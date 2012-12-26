@@ -1,7 +1,8 @@
 package com.Tanks;
 
-import java.io.*;
 import com.Tanks.Util;
+
+import java.io.*;
 
 public class Settings
 {
@@ -12,7 +13,8 @@ public class Settings
 	//All settings here are defaults
 	int display_width = 800;
 	int display_height = 600;
-	int display_full = 0; //false
+	boolean display_full = false;
+	boolean display_vsync = false;
 	
 	/**
 	 * Loads the settings from a file. Returns a value to indicate success
@@ -42,7 +44,9 @@ public class Settings
 						if (args[0].equals("display_height"))
 							this.display_height=Integer.parseInt(args[1]);
 						if (args[0].equals("display_full"))
-							this.display_full=Integer.parseInt(args[1]);
+							this.display_full=Boolean.parseBoolean(args[1].trim());
+						if (args[0].equals("display_vsync"))
+							this.display_vsync=Boolean.parseBoolean(args[1].trim());
 					}
 					catch (NumberFormatException nfe)
 					{
@@ -72,9 +76,12 @@ public class Settings
 	
 	public void printSettings()
 	{
+		Util.PrintText(2,"Starting with settings:");
 		Util.PrintText(2,"Display Width    :"+ this.display_width);
 		Util.PrintText(2,"Display Height   :"+ this.display_height);
-		Util.PrintText(2,"Display Full :"+ this.display_full);
+		Util.PrintText(2,"Display Full     :"+ this.display_full);
+		Util.PrintText(2,"Display VSync    :"+ this.display_vsync);
+		Util.PrintText(2,"\n");
 	}
 	
 	/**
@@ -91,6 +98,7 @@ public class Settings
 			out.write("display_width=" + display_width + "\r\n");
 			out.write("display_height=" + display_height + "\r\n");
 			out.write("display_full=" + display_full + "\r\n");
+			out.write("display_vsync=" + display_vsync + "\r\n");
 			out.close();
 		}
 		catch (IOException ioe)
@@ -105,25 +113,27 @@ public class Settings
 	public int getDisplayWidth(){
 		return display_width;
 	}
-	
 	public int getDisplayHeight(){
 		return display_height;
 	}
-	
-	public int getDisplayFull(){
+	public boolean getDisplayFull(){
 		return display_full;
 	}
+	public boolean getDisplayVsync(){
+		return display_vsync;
+	}
+	
 	
 	public void setDisplayWidth(int w){
 		display_width = w;
 	}
-
 	public void setDisplayHeight(int h){
 		display_height = h;
 	}
-	
-	public void setDisplayFull(int f){
-	if (f ==0 || f ==1)
+	public void setDisplayFull(boolean f){
 		display_full = f;
+	}
+	public void setDisplayVsync(boolean v){
+		display_vsync = v;
 	}
 }

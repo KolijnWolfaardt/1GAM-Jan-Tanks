@@ -1,14 +1,26 @@
 package com.Tanks;
 
+import com.Tanks.Util;
+import com.Tanks.OpenGLTools;
+
 import org.lwjgl.LWJGLException;
+import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import com.Tanks.Util;
+import org.lwjgl.opengl.GL11;
 
 public class Runner 
 {
 	Settings gameSettings;
 	
+	// time at last frame
+	long lastFrame;
+	//frames per second 
+	int fps;
+	// last fps time
+	long lastFPS;
+		
 	public Runner()
 	{
 		//First steps first. Create Settings object. Load from file. If file does not exist, create one, save.
@@ -40,69 +52,74 @@ public class Runner
 
 	public void start() 
 	{
-		try
-		{
-			//First, a few validation checks.
-			DisplayMode currentCapabilities = Display.getDesktopDisplayMode();
-			
-			//Is fullscreen is supported
-			if (!currentCapabilities.isFullscreenCapable()) // If the screen cannot go fullscreen
-			{
-				if (gameSettings.getDisplayFull()==1)	//And the user is trying to go fullscreen
-				{
-					Util.PrintText(1,"Sorry, fullscreen is not supported on your screen");
-					gameSettings.setDisplayFull(0);
-				}
-			}
-			
-			//Is the resolution larger than the supported resolution?
-			if (gameSettings.getDisplayHeight() > currentCapabilities.getHeight())
-			{
-				Util.PrintText(1,"Resolution height is larger than the supported resolution");
-				gameSettings.setDisplayHeight(currentCapabilities.getHeight());
-			}
-
-			if (gameSettings.getDisplayWidth() > currentCapabilities.getWidth())
-			{
-				Util.PrintText(1,"Resolution width is larger than the supported resolution");
-				gameSettings.setDisplayWidth(currentCapabilities.getWidth());
-			}			
-				
-			//Now create the Display
-			Display.setDisplayMode(new DisplayMode(gameSettings.getDisplayWidth(), gameSettings.getDisplayHeight()));
-			Display.setDisplayMode(Display.getDesktopDisplayMode());
-			
-			if ( gameSettings.getDisplayFull() == 1)
-			{
-				Util.PrintText(1,"Going Fullscreen");
-				Display.setFullscreen(true);
-			}
-			
-			Display.create();
-			
-
-		}
-		catch (LWJGLException e)
-		{
-			e.printStackTrace();
-			System.exit(0);
-		}
+		OpenGLTools.setupGL(gameSettings);
+		OpenGLTools.initGL(gameSettings);
 		
-		// init OpenGL here
+		GeneralDisplay gd = new GeneralDisplay();
 		
+		getDelta();
+		lastFPS = getTime();
+
 		while (!Display.isCloseRequested())
-		{
-			// render OpenGL here
+		{		
+			int delta = getDelta();	
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_F10))
+			{
+				//Toggle fullscreen! Yay.
+				gameSettings.setDisplayFull(!gameSettings.getDisplayFull());
+				Display.destroy();
+				System.out.println("Destroying Display");
+				OpenGLTools.setupGL(gameSettings);
+				OpenGLTools.initGL(gameSettings);
+			}
+			
+			gd.update(delta);
+			updateFPS();
+			
+			gd.render();
+
 			Display.update();
+			Display.sync(120); 
 		}
-		
+
 		Display.destroy();
 	}
+	
+	//Calculate how many milliseconds have passed since last frame.
+	public int getDelta()
+	{
+	    long time = getTime();
+	    int delta = (int) (time - lastFrame);
+	    lastFrame = time;
+	 
+	    return delta;
+	}
+	
+
+	//Get the accurate system time
+	public long getTime()
+	{
+	    return (Sys.getTime() * 1000) / Sys.getTimerResolution();
+	}
+	
+	
+	// Calculate the FPS and set it in the title bar
+	public void updateFPS()
+	{
+		if (getTime() - lastFPS > 1000)
+		{
+			Display.setTitle("FPS: " + fps);
+			fps = 0;
+			lastFPS += 1000;
+		}
+		fps++;
+	}
+	
 	
 	public static void main(String[] argv)
 	{
 		System.setProperty("org.lwjgl.librarypath",System.getProperty("user.dir") + "/lwjgl/natives/");
-		
 	
 		Runner displayExample = new Runner();
 		displayExample.start();
