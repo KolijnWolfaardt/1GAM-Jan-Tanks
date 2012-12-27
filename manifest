@@ -1,2 +1,2 @@
 Main-Class: com.Tanks.Runner
-Class-Path: lwjgl/lwjgl.jar
+Class-Path: lwjgl/lwjgl.jar lwjgl/slick.jar

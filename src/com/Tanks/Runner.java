@@ -55,7 +55,8 @@ public class Runner
 		OpenGLTools.setupGL(gameSettings);
 		OpenGLTools.initGL(gameSettings);
 		
-		GeneralDisplay gd = new GeneralDisplay();
+		GameDisplay gd = new GameDisplay();
+		gd.init();
 		
 		getDelta();
 		lastFPS = getTime();
