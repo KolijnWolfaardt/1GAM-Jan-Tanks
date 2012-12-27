@@ -3,6 +3,7 @@ package com.Tanks;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -115,6 +116,8 @@ public class GameDisplay extends GeneralDisplay
 			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()+50);	
 		GL11.glEnd();
 		
+		GL11.glPopMatrix();	
+		
 		//Draw Turrent
 		GL11.glPushMatrix();
 		GL11.glTranslatef(theTank.getXPos(), theTank.getYPos(), 0);
@@ -163,10 +166,21 @@ public class GameDisplay extends GeneralDisplay
 		}
 		else
 		{
-			if (currLev.playerTank.speed>0)
-				currLev.playerTank.speed-=currLev.playerTank.speedInc;
-			if (currLev.playerTank.speed<0)
-				currLev.playerTank.speed+=currLev.playerTank.speedInc;
+			if (currLev.playerTank.speed>(currLev.playerTank.speedInc* delta)/16.0f)
+			{
+				currLev.playerTank.speed-=(currLev.playerTank.speedInc * delta)/32.0f;
+			}
+			else
+			{
+				if (currLev.playerTank.speed<(0-currLev.playerTank.speedInc* delta)/16.0f)
+				{
+					currLev.playerTank.speed+=(currLev.playerTank.speedInc * delta)/32.0f;
+				}
+				else
+				{
+					currLev.playerTank.speed=0;
+				}
+			}
 
 		}
 		
@@ -174,17 +188,21 @@ public class GameDisplay extends GeneralDisplay
 		if (Keyboard.isKeyDown(Keyboard.KEY_A))
 		{
 			//Add to forward speed.
-			currLev.playerTank.bodyRot +=Math.PI/200;
+			currLev.playerTank.bodyRot +=Math.PI/1000 * delta;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_D))
 		{
 			//Add to forward speed.
-			currLev.playerTank.bodyRot -=Math.PI/200;
+			currLev.playerTank.bodyRot -=Math.PI/1000 * delta;
 		}
 		
 		//Update Tank's positions
-		currLev.playerTank.XPos += Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed;
-		currLev.playerTank.YPos += Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed;
+		currLev.playerTank.XPos += Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta;
+		currLev.playerTank.YPos += Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta;
+		
+		//Update Turrent Direction
+		currLev.playerTank.turrentRot= (float)Math.atan2(Mouse.getY()-currLev.playerTank.getYPos(),Mouse.getX()-currLev.playerTank.getXPos());
+		
 	}
 }
 

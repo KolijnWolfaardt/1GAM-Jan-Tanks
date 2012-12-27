@@ -65,7 +65,7 @@ public class Runner
 		{		
 			int delta = getDelta();	
 			
-			if (Keyboard.isKeyDown(Keyboard.KEY_F10))
+			/*if (Keyboard.isKeyDown(Keyboard.KEY_F10))
 			{
 				//Toggle fullscreen! Yay.
 				gameSettings.setDisplayFull(!gameSettings.getDisplayFull());
@@ -73,7 +73,9 @@ public class Runner
 				System.out.println("Destroying Display");
 				OpenGLTools.setupGL(gameSettings);
 				OpenGLTools.initGL(gameSettings);
-			}
+			}*/
+			
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
 			
 			gd.update(delta);
 			updateFPS();

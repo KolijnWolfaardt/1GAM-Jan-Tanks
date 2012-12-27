@@ -9,6 +9,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
+import org.lwjgl.input.Mouse;
+
 public class OpenGLTools
 {
 	public static void setupGL(Settings set)
@@ -83,11 +85,9 @@ public class OpenGLTools
 		
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glEnable(GL11.GL_BLEND); 
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
-
-		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		//Mouse.setGrabbed(true); 
 	}
 	
 	

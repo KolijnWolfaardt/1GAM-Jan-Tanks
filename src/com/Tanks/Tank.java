@@ -10,8 +10,8 @@ public class Tank
 	
 	float speed = 0.0f;
 	
-	float maxSpeed = 1.0f;
-	float speedInc = 0.1f;
+	float maxSpeed = 0.15f;
+	float speedInc = 0.015f;
 
 	public Tank()
 	{
