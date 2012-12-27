@@ -39,7 +39,7 @@ public class GameDisplay extends GeneralDisplay
 		
 		try
 		{
-			Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST);
+			Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST );
 			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST); //
 			
 			texOffset = Tiles1.getWidth() / 32.0f;
@@ -58,7 +58,7 @@ public class GameDisplay extends GeneralDisplay
 	public void render()
 	{
 		drawTiles();
-		drawTank();
+		drawTank(currLev.playerTank);
 	}
 	
 	private void drawTiles()
@@ -91,27 +91,48 @@ public class GameDisplay extends GeneralDisplay
 		GL11.glEnd();
 	}
 	
-	private void drawTank()
+	private void drawTank(Tank theTank)
 	{
 		Tanks1.bind();
-
+	
+		//Draw body
 		GL11.glPushMatrix();
-		GL11.glTranslatef(currLev.getPlayerXPos(), currLev.getPlayerYPos(), 0);
-		GL11.glRotatef((float) Math.toDegrees(currLev.getPlayerBodyRot()), 0f, 0f, 1f);
-		GL11.glTranslatef(-currLev.getPlayerXPos(), -currLev.getPlayerYPos(), 0);
+		GL11.glTranslatef(theTank.getXPos(), theTank.getYPos(), 0);
+		GL11.glRotatef((float) Math.toDegrees(theTank.getBodyRot()), 0f, 0f, 1f);
+		GL11.glTranslatef(-theTank.getXPos(), -theTank.getYPos(), 0);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0.0f,0.0f);
-			GL11.glVertex2f(currLev.getPlayerXPos()-50,currLev.getPlayerYPos()-50);
+			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()-50);
 					
 			GL11.glTexCoord2f(tankWidth,0.0f);
-			GL11.glVertex2f(currLev.getPlayerXPos()+50,currLev.getPlayerYPos()-50);
+			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()-50);
 				
 			GL11.glTexCoord2f(tankWidth,tankWidth);
-			GL11.glVertex2f(currLev.getPlayerXPos()+50,currLev.getPlayerYPos()+50);
+			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()+50);
 						
 			GL11.glTexCoord2f(0.0f,tankWidth);
-			GL11.glVertex2f(currLev.getPlayerXPos()-50,currLev.getPlayerYPos()+50);	
+			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()+50);	
+		GL11.glEnd();
+		
+		//Draw Turrent
+		GL11.glPushMatrix();
+		GL11.glTranslatef(theTank.getXPos(), theTank.getYPos(), 0);
+		GL11.glRotatef((float) Math.toDegrees(theTank.getTurrentRot()), 0f, 0f, 1f);
+		GL11.glTranslatef(-theTank.getXPos(), -theTank.getYPos(), 0);
+		
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f(tankWidth,0.0f);
+			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()-50);
+					
+			GL11.glTexCoord2f(tankWidth*2,0.0f);
+			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()-50);
+				
+			GL11.glTexCoord2f(tankWidth*2,tankWidth);
+			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()+50);
+						
+			GL11.glTexCoord2f(tankWidth,tankWidth);
+			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()+50);	
 		GL11.glEnd();
 		
 		GL11.glPopMatrix();	
@@ -121,5 +142,54 @@ public class GameDisplay extends GeneralDisplay
 	public void update(int delta)
 	{
 		
+		//Check for keyboard inputs
+		if (Keyboard.isKeyDown(Keyboard.KEY_S) ||Keyboard.isKeyDown(Keyboard.KEY_W))
+		{
+			if (Keyboard.isKeyDown(Keyboard.KEY_S))
+			{
+				if (currLev.playerTank.speed > -currLev.playerTank.maxSpeed)
+				{
+					currLev.playerTank.speed-=currLev.playerTank.speedInc;
+				}
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_W))
+			{
+				//Add to forward speed.
+				if (currLev.playerTank.speed < currLev.playerTank.maxSpeed)
+				{
+					currLev.playerTank.speed+=currLev.playerTank.speedInc;
+				}
+			}	
+		}
+		else
+		{
+			if (currLev.playerTank.speed>0)
+				currLev.playerTank.speed-=currLev.playerTank.speedInc;
+			if (currLev.playerTank.speed<0)
+				currLev.playerTank.speed+=currLev.playerTank.speedInc;
+
+		}
+		
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_A))
+		{
+			//Add to forward speed.
+			currLev.playerTank.bodyRot +=Math.PI/200;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_D))
+		{
+			//Add to forward speed.
+			currLev.playerTank.bodyRot -=Math.PI/200;
+		}
+		
+		//Update Tank's positions
+		currLev.playerTank.XPos += Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed;
+		currLev.playerTank.YPos += Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed;
 	}
 }
+
+
+
+
+
+

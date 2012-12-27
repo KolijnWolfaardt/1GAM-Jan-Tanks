@@ -11,14 +11,13 @@ public class Levelinfo
 	int gridYSize;
 	
 	//Centre Coordinates
-	int playerXPos = 100;
-	int playerYPos = 100;
-	
-	float playerBodyRot = 1.0f; //?????????
-	float playerTurrentRot = 1.0f;
+	public Tank playerTank;
 	
 	public void init()
 	{
+		playerTank = new Tank();
+		playerTank.XPos = 400;
+		playerTank.YPos = 400;
 	}
 	
 	public void loadFromFile(String fileName)
@@ -61,17 +60,5 @@ public class Levelinfo
 	}
 	
 	
-	//Player Variables
-	public int getPlayerXPos(){
-		return playerXPos;
-	}
-	public int getPlayerYPos(){
-		return playerYPos;
-	}
-	public float getPlayerBodyRot(){
-		return playerBodyRot;
-	}
-	public float getPlayerTurrentRot(){
-		return playerTurrentRot;
-	}
+
 }
