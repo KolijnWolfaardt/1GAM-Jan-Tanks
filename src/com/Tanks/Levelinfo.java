@@ -10,6 +10,12 @@ public class Levelinfo
 	int gridXSize;
 	int gridYSize;
 	
+	//Centre Coordinates
+	int playerXPos = 100;
+	int playerYPos = 100;
+	
+	float playerBodyRot = 1.0f; //?????????
+	float playerTurrentRot = 1.0f;
 	
 	public void init()
 	{
@@ -44,11 +50,28 @@ public class Levelinfo
 		}	
 	}
 	
+	
+	//Level Stuff
 	public int getGridXSize(){
 		return gridXSize;
 	}
 	
 	public int getGridYSize(){
 		return gridYSize;
+	}
+	
+	
+	//Player Variables
+	public int getPlayerXPos(){
+		return playerXPos;
+	}
+	public int getPlayerYPos(){
+		return playerYPos;
+	}
+	public float getPlayerBodyRot(){
+		return playerBodyRot;
+	}
+	public float getPlayerTurrentRot(){
+		return playerTurrentRot;
 	}
 }

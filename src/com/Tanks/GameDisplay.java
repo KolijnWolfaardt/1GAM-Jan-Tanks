@@ -20,11 +20,12 @@ public class GameDisplay extends GeneralDisplay
 	//This class should act like the main game engin.
 	//Levelinfo contains all info about the current level
 	Texture Tiles1;
-	Texture tankBody;
-	Texture tankTurrent;
+	Texture Tanks1;
 	
 	float texWidth = 0.0f;
 	float texOffset = 0.0f;
+	
+	float tankWidth = 0.0f;
 	
 	int tileSize = 40; //Draw 20px tiles as 40px tiles
 	
@@ -38,10 +39,13 @@ public class GameDisplay extends GeneralDisplay
 		
 		try
 		{
-			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST);
+			Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST);
+			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST); //
 			
 			texOffset = Tiles1.getWidth() / 32.0f;
 			texWidth = texOffset*20.0f/21.0f;
+			
+			tankWidth = Tanks1.getWidth()/4.0f;
 		}
 		catch (IOException ioe)
 		{
@@ -53,22 +57,16 @@ public class GameDisplay extends GeneralDisplay
 
 	public void render()
 	{
-		
-
-
-		
-		GL11.glBegin(GL11.GL_QUADS);
-		
 		drawTiles();
-		drawTank()
-
-		GL11.glEnd();
+		drawTank();
 	}
 	
 	private void drawTiles()
 	{
 		Tiles1.bind();
-		
+	
+		GL11.glBegin(GL11.GL_QUADS);
+				
 		for (int i = 0;i < currLev.getGridXSize(); i++)
 		{
 			for(int j = 0;j < currLev.getGridYSize();j++)
@@ -90,16 +88,34 @@ public class GameDisplay extends GeneralDisplay
 				GL11.glVertex2f(i*tileSize,(j+1)*tileSize);
 			}
 		}
+		GL11.glEnd();
 	}
 	
 	private void drawTank()
 	{
-		/*GL11.glPushMatrix();
-		GL11.glTranslatef((X-xpos), (Y-ypos), 0);
-		GL11.glRotatef((float) Math.toDegrees(rotation), 0f, 0f, 1f);
-		GL11.glTranslatef(-(X-xpos), -(Y-ypos), 0);	*/
+		Tanks1.bind();
+
+		GL11.glPushMatrix();
+		GL11.glTranslatef(currLev.getPlayerXPos(), currLev.getPlayerYPos(), 0);
+		GL11.glRotatef((float) Math.toDegrees(currLev.getPlayerBodyRot()), 0f, 0f, 1f);
+		GL11.glTranslatef(-currLev.getPlayerXPos(), -currLev.getPlayerYPos(), 0);
 		
-		/*GL11.glPopMatrix();*/		
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f(0.0f,0.0f);
+			GL11.glVertex2f(currLev.getPlayerXPos()-50,currLev.getPlayerYPos()-50);
+					
+			GL11.glTexCoord2f(tankWidth,0.0f);
+			GL11.glVertex2f(currLev.getPlayerXPos()+50,currLev.getPlayerYPos()-50);
+				
+			GL11.glTexCoord2f(tankWidth,tankWidth);
+			GL11.glVertex2f(currLev.getPlayerXPos()+50,currLev.getPlayerYPos()+50);
+						
+			GL11.glTexCoord2f(0.0f,tankWidth);
+			GL11.glVertex2f(currLev.getPlayerXPos()-50,currLev.getPlayerYPos()+50);	
+		GL11.glEnd();
+		
+		GL11.glPopMatrix();	
+		
 	}
 	
 	public void update(int delta)
