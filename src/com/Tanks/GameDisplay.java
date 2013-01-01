@@ -14,7 +14,8 @@ import org.newdawn.slick.util.ResourceLoader;
 
 import com.Tanks.Levelinfo;
 
-import java.io.IOException;
+import java.util.Scanner;
+import java.io.*;
 
 public class GameDisplay extends GeneralDisplay
 {
@@ -32,6 +33,8 @@ public class GameDisplay extends GeneralDisplay
 	
 	Levelinfo currLev;
 	
+	int[] tilesInfo = new int[1024];
+	
 	public void init()
 	{
 		currLev = new Levelinfo();
@@ -41,12 +44,22 @@ public class GameDisplay extends GeneralDisplay
 		try
 		{
 			Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST );
-			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST); //
+			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST); 
 			
 			texOffset = Tiles1.getWidth() / 32.0f;
 			texWidth = texOffset*20.0f/21.0f;
 			
 			tankWidth = Tanks1.getWidth()/4.0f;
+			
+			Scanner sc = new Scanner(new File ("images/tilesdata.dat"));
+			
+			for (int i = 0; i < 1024; i++)
+			{
+				tilesInfo[i] = sc.nextInt();
+				//System.out.println(i + "\t" +tilesInfo[i]);
+			}
+			
+			sc.close();
 		}
 		catch (IOException ioe)
 		{
@@ -197,8 +210,32 @@ public class GameDisplay extends GeneralDisplay
 		}
 		
 		//Update Tank's positions
-		currLev.playerTank.XPos += Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta;
-		currLev.playerTank.YPos += Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta;
+		
+		float addX = (float)(Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta);
+		float addY = (float)(Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta);
+		
+		float checkPointX = currLev.playerTank.XPos + addX;
+		float checkPointY = currLev.playerTank.YPos + addY;
+		
+		if (addX>0)
+			checkPointX+=50;
+		else
+			checkPointX-=50;
+		
+		if(addY>0)
+			checkPointY+=50;
+		else
+			checkPointY-=50;
+		
+		float newPosX = currLev.playerTank.XPos + addX;
+		float newPosY = currLev.playerTank.YPos + addY;
+		
+		
+		if (tilesInfo[currLev.grid[((int)checkPointY)/tileSize][((int)checkPointX)/tileSize]]  < 10)
+		{
+			currLev.playerTank.XPos = newPosX;
+			currLev.playerTank.YPos = newPosY;
+		}
 		
 		//Update Turrent Direction
 		currLev.playerTank.turrentRot= (float)Math.atan2(Mouse.getY()-currLev.playerTank.getYPos(),Mouse.getX()-currLev.playerTank.getXPos());
