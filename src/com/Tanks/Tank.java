@@ -8,10 +8,11 @@ public class Tank
 	float bodyRot = 0.0f;
 	float turrentRot = 1.0f;
 	
-	float speed = 0.0f;
+	float Speed = 0.0f;
 	
 	float maxSpeed = 0.15f;
 	float speedInc = 0.015f;
+	float GoalRot = 0.0f;
 
 	public Tank()
 	{

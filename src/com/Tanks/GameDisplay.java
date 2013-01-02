@@ -159,87 +159,67 @@ public class GameDisplay extends GeneralDisplay
 	{
 		
 		//Check for keyboard inputs
-		if (Keyboard.isKeyDown(Keyboard.KEY_S) ||Keyboard.isKeyDown(Keyboard.KEY_W))
+		
+		//Grid Movement 2
+		if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_D))
+		{
+			if (currLev.playerTank.Speed < currLev.playerTank.maxSpeed)
+				currLev.playerTank.Speed+= currLev.playerTank.speedInc;
+		}
+		else
+		{
+			currLev.playerTank.Speed = currLev.playerTank.Speed*0.5f;
+			if (Math.abs(currLev.playerTank.Speed) < currLev.playerTank.speedInc)
+				currLev.playerTank.Speed = 0;
+		}
+		int a = 0;
+		int b  =0;
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_W) )
+		{
+			b=1;
+		}
+		else
 		{
 			if (Keyboard.isKeyDown(Keyboard.KEY_S))
 			{
-				if (currLev.playerTank.speed > -currLev.playerTank.maxSpeed)
-				{
-					currLev.playerTank.speed-=currLev.playerTank.speedInc;
-				}
+				b=-1;
 			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_W))
-			{
-				//Add to forward speed.
-				if (currLev.playerTank.speed < currLev.playerTank.maxSpeed)
-				{
-					currLev.playerTank.speed+=currLev.playerTank.speedInc;
-				}
-			}	
+		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_A) )
+		{
+			a=-1;
 		}
 		else
 		{
-			if (currLev.playerTank.speed>(currLev.playerTank.speedInc* delta)/16.0f)
+			if (Keyboard.isKeyDown(Keyboard.KEY_D))
 			{
-				currLev.playerTank.speed-=(currLev.playerTank.speedInc * delta)/32.0f;
+				a=1;
 			}
-			else
-			{
-				if (currLev.playerTank.speed<(0-currLev.playerTank.speedInc* delta)/16.0f)
-				{
-					currLev.playerTank.speed+=(currLev.playerTank.speedInc * delta)/32.0f;
-				}
-				else
-				{
-					currLev.playerTank.speed=0;
-				}
-			}
+		}
+		
+		currLev.playerTank.GoalRot = (float)Math.atan2(b,a);
+		
+		currLev.playerTank.GoalRot = (float) (currLev.playerTank.GoalRot%(2.0*Math.PI));
+		currLev.playerTank.bodyRot = (float) (currLev.playerTank.bodyRot%(2.0*Math.PI));
+		
+		//Now rotate to match rotation.
+		if ((currLev.playerTank.GoalRot-currLev.playerTank.bodyRot) < Math.PI)
+		{
+			currLev.playerTank.bodyRot+= (currLev.playerTank.GoalRot-currLev.playerTank.bodyRot)*0.01f*delta;
+		}
+		else
+		{
+			currLev.playerTank.bodyRot-= (currLev.playerTank.GoalRot-currLev.playerTank.bodyRot)*0.01f*delta;
+		}
 
-		}
-		
-		
-		if (Keyboard.isKeyDown(Keyboard.KEY_A))
-		{
-			//Add to forward speed.
-			currLev.playerTank.bodyRot +=Math.PI/1000 * delta;
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_D))
-		{
-			//Add to forward speed.
-			currLev.playerTank.bodyRot -=Math.PI/1000 * delta;
-		}
-		
-		//Update Tank's positions
-		
-		float addX = (float)(Math.cos(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta);
-		float addY = (float)(Math.sin(currLev.playerTank.bodyRot)*currLev.playerTank.speed * delta);
-		
-		float checkPointX = currLev.playerTank.XPos + addX;
-		float checkPointY = currLev.playerTank.YPos + addY;
-		
-		if (addX>0)
-			checkPointX+=50;
-		else
-			checkPointX-=50;
-		
-		if(addY>0)
-			checkPointY+=50;
-		else
-			checkPointY-=50;
-		
-		float newPosX = currLev.playerTank.XPos + addX;
-		float newPosY = currLev.playerTank.YPos + addY;
-		
-		
-		if (tilesInfo[currLev.grid[((int)checkPointY)/tileSize][((int)checkPointX)/tileSize]]  < 10)
-		{
-			currLev.playerTank.XPos = newPosX;
-			currLev.playerTank.YPos = newPosY;
-		}
+		//Update Tank's positions using the speed
+		currLev.playerTank.XPos+=(float)(currLev.playerTank.Speed*Math.cos(currLev.playerTank.bodyRot)*delta);
+		currLev.playerTank.YPos+=(float)(currLev.playerTank.Speed*Math.sin(currLev.playerTank.bodyRot)*delta);
 		
 		//Update Turrent Direction
 		currLev.playerTank.turrentRot= (float)Math.atan2(Mouse.getY()-currLev.playerTank.getYPos(),Mouse.getX()-currLev.playerTank.getXPos());
-		
 	}
 }
 
