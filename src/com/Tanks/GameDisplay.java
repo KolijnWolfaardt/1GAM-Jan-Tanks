@@ -13,6 +13,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
 import com.Tanks.Levelinfo;
+import com.Tanks.TextTools;
 
 import java.util.Scanner;
 import java.io.*;
@@ -56,7 +57,6 @@ public class GameDisplay extends GeneralDisplay
 			for (int i = 0; i < 1024; i++)
 			{
 				tilesInfo[i] = sc.nextInt();
-				//System.out.println(i + "\t" +tilesInfo[i]);
 			}
 			
 			sc.close();
@@ -73,6 +73,14 @@ public class GameDisplay extends GeneralDisplay
 	{
 		drawTiles();
 		drawTank(currLev.playerTank);
+		TextTools.uFont.drawString(10, 800, "Welcome To the Machine");
+		TextTools.uFont.drawString(10, 820, "Speed : "+currLev.playerTank.Speed);
+		TextTools.uFont.drawString(10, 840, "GoalR : "+Math.toDegrees(currLev.playerTank.GoalRot));
+		TextTools.uFont.drawString(10, 860, "BodyR : "+Math.toDegrees(currLev.playerTank.bodyRot));
+		TextTools.uFont.drawString(10, 880, "Delta : "+Math.toDegrees(currLev.playerTank.GoalRot-currLev.playerTank.bodyRot));
+		TextTools.uFont.drawString(300, 820,"X pos : "+currLev.playerTank.XPos);
+		TextTools.uFont.drawString(300, 840,"Y pos : "+currLev.playerTank.YPos);
+		//TextTools.uFont.drawString(300, 860,"Delta : "+Math.toDegrees(currLev.playerTank.GoalRot-currLev.playerTank.bodyRot));
 	}
 	
 	private void drawTiles()
@@ -160,7 +168,7 @@ public class GameDisplay extends GeneralDisplay
 		
 		//Check for keyboard inputs
 		
-		//Grid Movement 2
+		//Grid Movement
 		if (Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_D))
 		{
 			if (currLev.playerTank.Speed < currLev.playerTank.maxSpeed)
@@ -198,28 +206,89 @@ public class GameDisplay extends GeneralDisplay
 				a=1;
 			}
 		}
+		if (!(a==0 && b==0))	//They are both 0, no keys have been pressed
+		{ 
+			currLev.playerTank.GoalRot = (float)Math.atan2(-b,a);
+		}
 		
-		currLev.playerTank.GoalRot = (float)Math.atan2(b,a);
+		if (currLev.playerTank.GoalRot < 0)
+		{
+			currLev.playerTank.GoalRot+=2.0*Math.PI;
+		}
+		
+		if (currLev.playerTank.bodyRot < 0)
+		{
+			currLev.playerTank.bodyRot+=2.0*Math.PI;
+		}
 		
 		currLev.playerTank.GoalRot = (float) (currLev.playerTank.GoalRot%(2.0*Math.PI));
 		currLev.playerTank.bodyRot = (float) (currLev.playerTank.bodyRot%(2.0*Math.PI));
 		
 		//Now rotate to match rotation.
-		if ((currLev.playerTank.GoalRot-currLev.playerTank.bodyRot) < Math.PI)
+		float radDelta = currLev.playerTank.GoalRot-currLev.playerTank.bodyRot;
+		if (radDelta > 0)
 		{
-			currLev.playerTank.bodyRot+= (currLev.playerTank.GoalRot-currLev.playerTank.bodyRot)*0.01f*delta;
+			if (radDelta > Math.PI)
+			{
+				currLev.playerTank.bodyRot+= (radDelta-2*Math.PI)*0.01f*delta;
+			}
+			else
+			{
+				currLev.playerTank.bodyRot+= radDelta*0.01f*delta;
+			}
 		}
 		else
 		{
-			currLev.playerTank.bodyRot-= (currLev.playerTank.GoalRot-currLev.playerTank.bodyRot)*0.01f*delta;
+			if (radDelta > -Math.PI)
+			{
+				currLev.playerTank.bodyRot+= radDelta*0.01f*delta;
+			}
+			else
+			{
+				currLev.playerTank.bodyRot+= (radDelta+2*Math.PI)*0.01f*delta;
+			}
 		}
-
-		//Update Tank's positions using the speed
-		currLev.playerTank.XPos+=(float)(currLev.playerTank.Speed*Math.cos(currLev.playerTank.bodyRot)*delta);
-		currLev.playerTank.YPos+=(float)(currLev.playerTank.Speed*Math.sin(currLev.playerTank.bodyRot)*delta);
 		
+		boolean move = true;
+		
+		//Calculate add
+		float addX = (float)(currLev.playerTank.Speed*Math.cos(currLev.playerTank.bodyRot)*delta);
+		float addY = (float)(currLev.playerTank.Speed*Math.sin(currLev.playerTank.bodyRot)*delta);
+		
+		//Calculate new grid position
+		int tankGridX = (int)(currLev.playerTank.XPos)/tileSize;
+		int tankGridY = (int)(currLev.playerTank.YPos)/tileSize;
+		
+		int tankNewGridX = (int)(currLev.playerTank.XPos+addX)/tileSize;
+		int tankNewGridY = (int)(currLev.playerTank.YPos+addY)/tileSize;
+
+		//Calculate current grid posistion
+		
+		if (!((tankNewGridX >= currLev.gridXSize-1) || (tankNewGridX <= 0))) //X direction is allowed to move
+		{
+			if (!(tilesInfo[currLev.grid[tankGridY][tankNewGridX]]<10))
+				move = false;
+
+		}
+		else
+			move = false;
+			
+		
+		if (!((tankNewGridY >= currLev.gridYSize-1) || (tankNewGridY <= 0)))
+		{
+			if (!(tilesInfo[currLev.grid[tankNewGridY][tankGridX]]<10))
+				move = false;
+		}
+		else
+			move = false;
+		
+		if (move)
+		{
+			currLev.playerTank.XPos+=addX;
+			currLev.playerTank.YPos+=addY;
+		}
 		//Update Turrent Direction
-		currLev.playerTank.turrentRot= (float)Math.atan2(Mouse.getY()-currLev.playerTank.getYPos(),Mouse.getX()-currLev.playerTank.getXPos());
+		currLev.playerTank.turrentRot= (float)Math.atan2(-(Mouse.getY()-currLev.playerTank.getYPos()),Mouse.getX()-currLev.playerTank.getXPos());
 	}
 }
 

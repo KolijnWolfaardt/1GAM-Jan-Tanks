@@ -7,7 +7,7 @@ public class Util
 		//Possible debug levels :
 		// 1 - light text
 		// 2 - More Text
-		// 3 - Fuckloads. Errors and everything. Everything documented
+		// 3 - Fuckloads. Errors and everything. Everything.
 	
 		int debugReq = 3; 
 		

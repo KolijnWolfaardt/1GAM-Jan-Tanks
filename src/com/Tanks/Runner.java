@@ -2,6 +2,7 @@ package com.Tanks;
 
 import com.Tanks.Util;
 import com.Tanks.OpenGLTools;
+import com.Tanks.TextTools;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -55,6 +56,8 @@ public class Runner
 		OpenGLTools.setupGL(gameSettings);
 		OpenGLTools.initGL(gameSettings);
 		
+		TextTools.init();
+		
 		GameDisplay gd = new GameDisplay();
 		gd.init();
 		
@@ -75,7 +78,7 @@ public class Runner
 				OpenGLTools.initGL(gameSettings);
 			}*/
 			
-			//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
 			
 			gd.update(delta);
 			updateFPS();
