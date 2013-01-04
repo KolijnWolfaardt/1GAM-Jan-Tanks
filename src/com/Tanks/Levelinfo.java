@@ -16,8 +16,8 @@ public class Levelinfo
 	public void init()
 	{
 		playerTank = new Tank();
-		playerTank.XPos = 400;
-		playerTank.YPos = 400;
+		playerTank.XPos = 200;
+		playerTank.YPos = 200;
 	}
 	
 	public void loadFromFile(String fileName)

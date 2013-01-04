@@ -30,10 +30,15 @@ public class GameDisplay extends GeneralDisplay
 	
 	float tankWidth = 0.0f;
 	
+	//screenOffset is the ammount we've scrolled. It is adjusted to keep the tank in the middle of the screen
+	float screenOffsetX = 100;
+	float screenOffsetY = 100;
+	
 	int tileSize = 40; //Draw 20px tiles as 40px tiles
 	
 	Levelinfo currLev;
 	
+	//TilesInfo tells us which tiles are transparent, destroyable, etc.
 	int[] tilesInfo = new int[1024];
 	
 	public void init()
@@ -88,26 +93,43 @@ public class GameDisplay extends GeneralDisplay
 		Tiles1.bind();
 	
 		GL11.glBegin(GL11.GL_QUADS);
+		
+		//calculate first tile to do.
+		/*
+		int firstTileX = ((int)screenOffsetX)/tileSize;
+		int firstTileY = ((int)screenOffsetY)/tileSize;
+		
+		int xAmmount = 1600/tileSize;
+		int yAmmount = 900/tileSize;
+		
+		if (xAmmount > currLev.getGridXSize()-firstTileX)
+			xAmmount = currLev.getGridXSize()-firstTileX;
+		if (yAmmount > currLev.getGridYSize()-firstTileY)
+			yAmmount = currLev.getGridYSize()-firstTileY;
+			
+		System.out.println(xAmmount);
+		System.out.println(yAmmount);*/
 				
-		for (int i = 0;i < currLev.getGridXSize(); i++)
+		for (int i = 0; i < currLev.getGridXSize(); i++)
 		{
-			for(int j = 0;j < currLev.getGridYSize();j++)
+			for(int j = 0;	j < currLev.getGridYSize(); j++)
 			{
 				//Find the texture X and Y	
 				int texXPos = currLev.grid[j][i]%32;
 				int texYPos = currLev.grid[j][i]/32;
 			
+				//All offsets are converted to integers first, otherwise white lines occur between tiles.
 				GL11.glTexCoord2f(texXPos*texOffset,texYPos*texOffset);
-				GL11.glVertex2f(i*tileSize,j*tileSize);
+				GL11.glVertex2f(i*tileSize-(int)screenOffsetX,j*tileSize-(int)screenOffsetY);
 				
 				GL11.glTexCoord2f(texXPos*texOffset+texWidth,texYPos*texOffset);
-				GL11.glVertex2f((i+1)*tileSize,j*tileSize);
+				GL11.glVertex2f((i+1)*tileSize-(int)screenOffsetX,j*tileSize-(int)screenOffsetY);
 					
 				GL11.glTexCoord2f(texXPos*texOffset+texWidth,texYPos*texOffset+texWidth);
-				GL11.glVertex2f((i+1)*tileSize,(j+1)*tileSize);
+				GL11.glVertex2f((i+1)*tileSize-(int)screenOffsetX,(j+1)*tileSize-(int)screenOffsetY);
 					
 				GL11.glTexCoord2f(texXPos*texOffset,texYPos*texOffset+texWidth);
-				GL11.glVertex2f(i*tileSize,(j+1)*tileSize);
+				GL11.glVertex2f(i*tileSize-(int)screenOffsetX,(j+1)*tileSize-(int)screenOffsetY);
 			}
 		}
 		GL11.glEnd();
@@ -116,47 +138,51 @@ public class GameDisplay extends GeneralDisplay
 	private void drawTank(Tank theTank)
 	{
 		Tanks1.bind();
+		
+		//Calculate the position, with the screen offset.
+		float xPos = theTank.getXPos() - screenOffsetX;
+		float yPos = theTank.getYPos() - screenOffsetY;
 	
 		//Draw body
 		GL11.glPushMatrix();
-		GL11.glTranslatef(theTank.getXPos(), theTank.getYPos(), 0);
+		GL11.glTranslatef(xPos, yPos, 0);
 		GL11.glRotatef((float) Math.toDegrees(theTank.getBodyRot()), 0f, 0f, 1f);
-		GL11.glTranslatef(-theTank.getXPos(), -theTank.getYPos(), 0);
+		GL11.glTranslatef(-xPos, -yPos, 0);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0.0f,0.0f);
-			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()-50);
+			GL11.glVertex2f(xPos-50,yPos-50);
 					
 			GL11.glTexCoord2f(tankWidth,0.0f);
-			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()-50);
+			GL11.glVertex2f(xPos+50,yPos-50);
 				
 			GL11.glTexCoord2f(tankWidth,tankWidth);
-			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()+50);
+			GL11.glVertex2f(xPos+50,yPos+50);
 						
 			GL11.glTexCoord2f(0.0f,tankWidth);
-			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()+50);	
+			GL11.glVertex2f(xPos-50,yPos+50);	
 		GL11.glEnd();
 		
 		GL11.glPopMatrix();	
 		
 		//Draw Turrent
 		GL11.glPushMatrix();
-		GL11.glTranslatef(theTank.getXPos(), theTank.getYPos(), 0);
+		GL11.glTranslatef(xPos, yPos, 0);
 		GL11.glRotatef((float) Math.toDegrees(theTank.getTurrentRot()), 0f, 0f, 1f);
-		GL11.glTranslatef(-theTank.getXPos(), -theTank.getYPos(), 0);
+		GL11.glTranslatef(-xPos, -yPos, 0);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(tankWidth,0.0f);
-			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()-50);
+			GL11.glVertex2f(xPos-50,yPos-50);
 					
 			GL11.glTexCoord2f(tankWidth*2,0.0f);
-			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()-50);
+			GL11.glVertex2f(xPos+50,yPos-50);
 				
 			GL11.glTexCoord2f(tankWidth*2,tankWidth);
-			GL11.glVertex2f(theTank.getXPos()+50,theTank.getYPos()+50);
+			GL11.glVertex2f(xPos+50,yPos+50);
 						
 			GL11.glTexCoord2f(tankWidth,tankWidth);
-			GL11.glVertex2f(theTank.getXPos()-50,theTank.getYPos()+50);	
+			GL11.glVertex2f(xPos-50,yPos+50);	
 		GL11.glEnd();
 		
 		GL11.glPopMatrix();	
@@ -226,28 +252,34 @@ public class GameDisplay extends GeneralDisplay
 		
 		//Now rotate to match rotation.
 		float radDelta = currLev.playerTank.GoalRot-currLev.playerTank.bodyRot;
+		float angleinc = 0;
 		if (radDelta > 0)
 		{
 			if (radDelta > Math.PI)
 			{
-				currLev.playerTank.bodyRot+= (radDelta-2*Math.PI)*0.01f*delta;
+				angleinc = (float)((radDelta-2*Math.PI)*0.01f*delta);
 			}
 			else
 			{
-				currLev.playerTank.bodyRot+= radDelta*0.01f*delta;
+				angleinc = radDelta*0.01f*delta;
 			}
 		}
 		else
 		{
 			if (radDelta > -Math.PI)
 			{
-				currLev.playerTank.bodyRot+= radDelta*0.01f*delta;
+				angleinc = radDelta*0.01f*delta;
 			}
 			else
 			{
-				currLev.playerTank.bodyRot+= (radDelta+2*Math.PI)*0.01f*delta;
+				angleinc = (float)((radDelta+2*Math.PI)*0.01f*delta);
 			}
 		}
+		
+		currLev.playerTank.bodyRot += angleinc;
+		//Calculate the corners.
+		float xcorner = 0;
+		float ycorner = 0;
 		
 		boolean move = true;
 		
@@ -287,6 +319,9 @@ public class GameDisplay extends GeneralDisplay
 			currLev.playerTank.XPos+=addX;
 			currLev.playerTank.YPos+=addY;
 		}
+		
+		screenOffsetX = currLev.playerTank.XPos - 400;
+		screenOffsetY = currLev.playerTank.YPos - 400;
 		//Update Turrent Direction
 		currLev.playerTank.turrentRot= (float)Math.atan2(-(Mouse.getY()-currLev.playerTank.getYPos()),Mouse.getX()-currLev.playerTank.getXPos());
 	}
