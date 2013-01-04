@@ -41,6 +41,8 @@ public class GameDisplay extends GeneralDisplay
 	//TilesInfo tells us which tiles are transparent, destroyable, etc.
 	int[] tilesInfo = new int[1024];
 	
+	ParticleSystem test;
+	
 	public void init()
 	{
 		currLev = new Levelinfo();
@@ -71,6 +73,10 @@ public class GameDisplay extends GeneralDisplay
 			// TODO Auto-generated catch block
 			ioe.printStackTrace();
 		}
+		
+		//Particle Systems
+		test = new ParticleSystem("images/smokeParticle.png",200,600);
+		test.add();
 	}
 	
 
@@ -85,7 +91,8 @@ public class GameDisplay extends GeneralDisplay
 		TextTools.uFont.drawString(10, 880, "Delta : "+Math.toDegrees(currLev.playerTank.GoalRot-currLev.playerTank.bodyRot));
 		TextTools.uFont.drawString(300, 820,"X pos : "+currLev.playerTank.XPos);
 		TextTools.uFont.drawString(300, 840,"Y pos : "+currLev.playerTank.YPos);
-		//TextTools.uFont.drawString(300, 860,"Delta : "+Math.toDegrees(currLev.playerTank.GoalRot-currLev.playerTank.bodyRot));
+		
+		test.render();
 	}
 	
 	private void drawTiles()
@@ -323,8 +330,16 @@ public class GameDisplay extends GeneralDisplay
 		screenOffsetX = currLev.playerTank.XPos - 400;
 		screenOffsetY = currLev.playerTank.YPos - 400;
 		//Update Turrent Direction
-		currLev.playerTank.turrentRot= (float)Math.atan2(-(Mouse.getY()-currLev.playerTank.getYPos()),Mouse.getX()-currLev.playerTank.getXPos());
-	}
+		
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) )
+		{
+			test.add();
+		}
+		test.update(delta);
+		
+		currLev.playerTank.turrentRot= (float)Math.atan2((900-Mouse.getY())-(currLev.playerTank.getYPos()-screenOffsetY),Mouse.getX()-(currLev.playerTank.getXPos()-screenOffsetX)); 		
+	 }
 }
 
 
