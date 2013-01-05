@@ -23,12 +23,14 @@ public class GameDisplay extends GeneralDisplay
 	//This class should act like the main game engin.
 	//Levelinfo contains all info about the current level
 	Texture Tiles1;
-	Texture Tanks1;
+	///Texture Tanks1;
 	
 	float texWidth = 0.0f;
 	float texOffset = 0.0f;
 	
-	float tankWidth = 0.0f;
+	///float tankWidth = 0.0f;
+	
+	///float moveDistance = 0; //Distance that the tank has moved. Used for track particles
 	
 	//screenOffset is the ammount we've scrolled. It is adjusted to keep the tank in the middle of the screen
 	float screenOffsetX = 100;
@@ -42,6 +44,7 @@ public class GameDisplay extends GeneralDisplay
 	int[] tilesInfo = new int[1024];
 	
 	ParticleSystem test;
+	//ParticleSystem TankTracks;
 	
 	public void init()
 	{
@@ -49,15 +52,17 @@ public class GameDisplay extends GeneralDisplay
 		currLev.init();
 		currLev.loadFromFile("leveldata/level01.dat");
 		
+		Tank.init();
+		
 		try
 		{
-			Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST );
+			///Tanks1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tanks.png"),GL11.GL_NEAREST );
 			Tiles1 = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("images/tiles.png"),GL11.GL_NEAREST); 
 			
 			texOffset = Tiles1.getWidth() / 32.0f;
 			texWidth = texOffset*20.0f/21.0f;
 			
-			tankWidth = Tanks1.getWidth()/4.0f;
+			///tankWidth = Tanks1.getWidth()/4.0f;
 			
 			Scanner sc = new Scanner(new File ("images/tilesdata.dat"));
 			
@@ -75,16 +80,26 @@ public class GameDisplay extends GeneralDisplay
 		}
 		
 		//Particle Systems
-		test = new ParticleSystem("images/smokeParticle.png",200,600);
-		test.add();
+		test = new ParticleSystem("images/tracksParticle.png",true,200,600,1500);
+		test.startSpeedX = 0;
+		test.startSpeedY = -2;
+		test.accX=0.0f;
+		test.accY=0.2f;
 	}
 	
 
 	public void render()
 	{
 		drawTiles();
-		drawTank(currLev.playerTank);
-		TextTools.uFont.drawString(10, 800, "Welcome To the Machine");
+		
+		for (int i = 0;i<currLev.EnemyTanks.size(); i++)
+		{
+			currLev.EnemyTanks.get(i).render(screenOffsetX,screenOffsetY);
+		}
+		
+		///TankTracks.render((int)screenOffsetX,(int)screenOffsetY);
+		currLev.playerTank.render(screenOffsetX,screenOffsetY);
+		
 		TextTools.uFont.drawString(10, 820, "Speed : "+currLev.playerTank.Speed);
 		TextTools.uFont.drawString(10, 840, "GoalR : "+Math.toDegrees(currLev.playerTank.GoalRot));
 		TextTools.uFont.drawString(10, 860, "BodyR : "+Math.toDegrees(currLev.playerTank.bodyRot));
@@ -92,7 +107,6 @@ public class GameDisplay extends GeneralDisplay
 		TextTools.uFont.drawString(300, 820,"X pos : "+currLev.playerTank.XPos);
 		TextTools.uFont.drawString(300, 840,"Y pos : "+currLev.playerTank.YPos);
 		
-		test.render();
 	}
 	
 	private void drawTiles()
@@ -101,21 +115,8 @@ public class GameDisplay extends GeneralDisplay
 	
 		GL11.glBegin(GL11.GL_QUADS);
 		
-		//calculate first tile to do.
-		/*
-		int firstTileX = ((int)screenOffsetX)/tileSize;
-		int firstTileY = ((int)screenOffsetY)/tileSize;
-		
-		int xAmmount = 1600/tileSize;
-		int yAmmount = 900/tileSize;
-		
-		if (xAmmount > currLev.getGridXSize()-firstTileX)
-			xAmmount = currLev.getGridXSize()-firstTileX;
-		if (yAmmount > currLev.getGridYSize()-firstTileY)
-			yAmmount = currLev.getGridYSize()-firstTileY;
-			
-		System.out.println(xAmmount);
-		System.out.println(yAmmount);*/
+		//Currently, more tiles are being drawn then should be.
+		//More calculations, to only draw visible tiles
 				
 		for (int i = 0; i < currLev.getGridXSize(); i++)
 		{
@@ -142,59 +143,6 @@ public class GameDisplay extends GeneralDisplay
 		GL11.glEnd();
 	}
 	
-	private void drawTank(Tank theTank)
-	{
-		Tanks1.bind();
-		
-		//Calculate the position, with the screen offset.
-		float xPos = theTank.getXPos() - screenOffsetX;
-		float yPos = theTank.getYPos() - screenOffsetY;
-	
-		//Draw body
-		GL11.glPushMatrix();
-		GL11.glTranslatef(xPos, yPos, 0);
-		GL11.glRotatef((float) Math.toDegrees(theTank.getBodyRot()), 0f, 0f, 1f);
-		GL11.glTranslatef(-xPos, -yPos, 0);
-		
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(0.0f,0.0f);
-			GL11.glVertex2f(xPos-50,yPos-50);
-					
-			GL11.glTexCoord2f(tankWidth,0.0f);
-			GL11.glVertex2f(xPos+50,yPos-50);
-				
-			GL11.glTexCoord2f(tankWidth,tankWidth);
-			GL11.glVertex2f(xPos+50,yPos+50);
-						
-			GL11.glTexCoord2f(0.0f,tankWidth);
-			GL11.glVertex2f(xPos-50,yPos+50);	
-		GL11.glEnd();
-		
-		GL11.glPopMatrix();	
-		
-		//Draw Turrent
-		GL11.glPushMatrix();
-		GL11.glTranslatef(xPos, yPos, 0);
-		GL11.glRotatef((float) Math.toDegrees(theTank.getTurrentRot()), 0f, 0f, 1f);
-		GL11.glTranslatef(-xPos, -yPos, 0);
-		
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(tankWidth,0.0f);
-			GL11.glVertex2f(xPos-50,yPos-50);
-					
-			GL11.glTexCoord2f(tankWidth*2,0.0f);
-			GL11.glVertex2f(xPos+50,yPos-50);
-				
-			GL11.glTexCoord2f(tankWidth*2,tankWidth);
-			GL11.glVertex2f(xPos+50,yPos+50);
-						
-			GL11.glTexCoord2f(tankWidth,tankWidth);
-			GL11.glVertex2f(xPos-50,yPos+50);	
-		GL11.glEnd();
-		
-		GL11.glPopMatrix();	
-		
-	}
 	
 	public void update(int delta)
 	{
@@ -325,11 +273,20 @@ public class GameDisplay extends GeneralDisplay
 		{
 			currLev.playerTank.XPos+=addX;
 			currLev.playerTank.YPos+=addY;
+			
+			currLev.playerTank.moveDistance+=Math.sqrt(addX*addX+addY*addY);
+			
+			
 		}
 		
 		screenOffsetX = currLev.playerTank.XPos - 400;
 		screenOffsetY = currLev.playerTank.YPos - 400;
 		//Update Turrent Direction
+		
+		for (int i = 0;i<currLev.EnemyTanks.size(); i++)
+		{
+			currLev.EnemyTanks.get(i).update(delta);
+		}
 		
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) )
@@ -337,8 +294,10 @@ public class GameDisplay extends GeneralDisplay
 			test.add();
 		}
 		test.update(delta);
+		currLev.playerTank.update(delta);
 		
 		currLev.playerTank.turrentRot= (float)Math.atan2((900-Mouse.getY())-(currLev.playerTank.getYPos()-screenOffsetY),Mouse.getX()-(currLev.playerTank.getXPos()-screenOffsetX)); 		
+		
 	 }
 }
 
